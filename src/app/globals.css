@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --primary: #FF2D55;
+    --secondary: rgb(49, 123, 250);
+    --bg-alt: rgba(195, 219, 248, 0.68);
+    --bg-w-alt: rgb(29,29,31);
+    --my-width: calc(90% / 3);
+} 
+
+
+
+
+body {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: Outfit, Helvetica, sans-serif;
+}
+.wp-block-heading{
+  font-size: 40px;
+  font-weight: bold;
+  color: #FF2D55;
+
+}
+.phone-carousel-container .swiper {
+  /* This is crucial to allow side slides to be visible */
+  overflow: visible !important;
+  padding-bottom: 80px; /* Adjusted space for pagination and text */
+  padding-top: 50px; /* Add padding to the top if needed to prevent clipping */
+}
+
+/* Optional: Style pagination and navigation to match Apple's design */
+.swiper-pagination-bullet {
+  background-color: rgba(255, 45, 85, 0.6) !important;
+  width: 8px;
+  height: 8px;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #FF2D55 !important;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #000;
+  transform: scale(0.6);
+  /* Adjust position if they overlap with the slides due to scale */
+  top: 50%; 
+  margin-top: -30px; /* Half of button height to center */
+}
+
+

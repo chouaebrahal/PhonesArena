@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output is optional; default is node_modules/@prisma/client
+  // output = "../generated/prisma" 
+}
+
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  wishlists    Wishlist[]
+  comparisons  Comparison[]
+  comments     Comment[]
+  ratings      Rating[]
+}
+
+model Brand {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  phones    Phone[]
+}
+
+model Phone {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String     @unique
+  releaseDate DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  brandId     String     @db.ObjectId
+  brand       Brand      @relation(fields: [brandId], references: [id])
+
+  specifications PhoneSpecification[]
+  colors         PhoneColor[]
+  comments       Comment[]
+  wishlists      Wishlist[]
+  comparisonItems ComparisonItem[]
+  ratings        Rating[]
+}
+
+model PhoneSpecification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String
+  value     String
+  imageUrl  String?
+  category  String?   // e.g. "Display", "Camera"
+
+  phoneId   String   @db.ObjectId
+  phone     Phone    @relation(fields: [phoneId], references: [id])
+
+  @@unique([phoneId, key])
+}
+
+model PhoneColor {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String   // e.g. "Black"
+  hexCode  String   // e.g. "#000000"
+  imageUrl String   // one image per color
+
+  phoneId  String   @db.ObjectId
+  phone    Phone    @relation(fields: [phoneId], references: [id])
+
+  @@unique([phoneId, name])
+}
+
+model Wishlist {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  phoneId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  user      User   @relation(fields: [userId], references: [id])
+  phone     Phone  @relation(fields: [phoneId], references: [id])
+
+  @@unique([userId, phoneId])
+}
+
+model Comparison {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String          @db.ObjectId
+  createdAt DateTime        @default(now())
+
+  user      User            @relation(fields: [userId], references: [id])
+  items     ComparisonItem[]
+}
+
+model ComparisonItem {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  comparisonId  String      @db.ObjectId
+  phoneId       String      @db.ObjectId
+
+  comparison    Comparison  @relation(fields: [comparisonId], references: [id])
+  phone         Phone       @relation(fields: [phoneId], references: [id])
+
+  @@unique([comparisonId, phoneId])
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String   @db.ObjectId
+  phoneId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  phone     Phone    @relation(fields: [phoneId], references: [id])
+}
+
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  value     Int      // 1 to 5 stars
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String   @db.ObjectId
+  phoneId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  phone     Phone    @relation(fields: [phoneId], references: [id])
+
+  @@unique([userId, phoneId])
+}
