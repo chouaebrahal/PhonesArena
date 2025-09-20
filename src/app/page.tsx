@@ -1,46 +1,40 @@
 import LatestPosts from "@/components/latestposts/LatestPosts";
 import PagesHeading from "@/components/pagesheading/PagesHeading";
-import prisma from "@/lib/prisma";
+import { Phone,Pagination } from "@/lib/types";
 
-const getPhones = async (searchTerm?: string, brandTerm?: string) => {
-  let where: any = {};
-  if (searchTerm) {
-    where.name = { contains: searchTerm, mode: 'insensitive' };
-  }
-  if (brandTerm) {
-    where.brand = { slug: brandTerm };
+async function getPhones(searchParams: { [key: string]: string | undefined }): Promise<{ data: Phone[], pagination: Pagination | null }> {
+  const { searchTerm, brandTerm, limit, sortBy, sortOrder } = await searchParams;
+  const query = new URLSearchParams({
+    ...(searchTerm && { searchTerm }),
+    ...(brandTerm && { brandTerm }),
+    ...(limit && { limit }),
+    ...(sortBy && { sortBy }),
+    ...(sortOrder && { sortOrder }),
+  }).toString();
+
+  // In a real app, you'd fetch from your absolute URL
+  // For this example, we'll assume it's running on localhost
+  const res = await fetch(`http://localhost:3000/api/phones`)
+  
+  if (!res.ok) {
+    throw new Error('Failed to fetch phones');
   }
 
-  const phones = await prisma.phone.findMany({
-    take: 5,
-    where,
-    include: {
-      brand: true,
-      images: true,
-      specifications: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-  return phones;
-};
+  return res.json();
+}
 
 export default async function Home({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const searchTerm = searchParams.searchTerm;
-  const brandTerm = searchParams.brandTerm;
-
-  const phones = await getPhones(searchTerm, brandTerm);
+  const { data, pagination } = await getPhones(searchParams);
+  
+  const { searchTerm, brandTerm } = await searchParams;
 
   return (
     <div className=" min-h-screen">
       <PagesHeading
-        title="Welcome to Our Blog"
-        views={1234}
-        author={{ name: "Chouaeb Rahal", avatar: "/images/49.png" }}
-        publishedAt="September 11, 2025"
+        title="All Phones"
+        subtitle="Explore our comprehensive list of the latest smartphones."
       />
-      <LatestPosts phones={phones} searchTerm={searchTerm} brandTerm={brandTerm} />
+      <LatestPosts initialPhones={data} nextCursor={pagination} searchTerm={searchTerm} brandTerm={brandTerm} />
     </div>
   );
 }

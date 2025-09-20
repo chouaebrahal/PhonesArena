@@ -1,20 +1,18 @@
 import Image from "next/image";
 import { Eye } from "lucide-react";
-import { PhoneType } from "@/lib/types";
+import { Phone } from "@/lib/types";
 import Link from "next/link";
 
 type PostCardProps = {
-  post: PhoneType;
+  post: Phone;
   latest?: boolean;
 };
 
 const  PostCard = ({ post, latest }: PostCardProps) => {
-  const { name, slug, releaseDate, price, brand, images, specifications } = post;
+  const { name, slug, releaseDate, launchPrice, brand, primaryImage, description } = post;
 
-  const excerpt = specifications
-    .slice(0, 3)
-    .map((spec) => `${spec.key}: ${spec.value}`)
-    .join(' | ');
+  const excerpt = description;
+ 
 
   return (
     <Link
@@ -29,7 +27,7 @@ const  PostCard = ({ post, latest }: PostCardProps) => {
       >
         <Image
           alt={name}
-          src={images?.[0]?.url ?? "/next.svg"}
+          src={primaryImage ?? "/next.svg"}
           width={800}
           height={500}
           className="w-full h-full object-cover hover:scale-105 duration-300"
@@ -37,7 +35,7 @@ const  PostCard = ({ post, latest }: PostCardProps) => {
         {/* Views badge */}
         <div className="absolute bottom-2 right-2 flex items-center bg-black/60 text-[13px] px-2 py-1 rounded-full text-yellow-100">
           <Eye className="text-white w-4 h-4 mr-1" />
-          <span>{price}</span>
+          <span>{launchPrice}</span>
         </div>
       </div>
 
@@ -45,7 +43,7 @@ const  PostCard = ({ post, latest }: PostCardProps) => {
       <div className={`py-4 flex flex-col ${latest ? "gap-4" : "gap-2"}`}>
         {/* Category */}
         <button className="px-3 py-1 text-[var(--foreground)] text-[13px] font-semibold w-fit rounded-full border bg-[var(--primary)] hover:bg-yellow-400 transition">
-          {brand.name}
+          {brand?.name}
         </button>
 
         {/* Title & Date */}

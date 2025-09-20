@@ -5,7 +5,7 @@
     --foreground: #000000;
     --primary: #FF2D55;
     --secondary: rgb(49, 123, 250);
-    --bg-alt: rgba(195, 219, 248, 0.68);
+    --bg-alt: #F5F5F7;
     --bg-w-alt: rgb(29,29,31);
     --my-width: calc(90% / 3);
 } 

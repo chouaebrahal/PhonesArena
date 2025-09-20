@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PhoneType } from '@/lib/types';
+import { Phone } from '@/lib/types';
 import PostCard from './postCard/PostCard';
 
 type LoadMorePhonesProps = {
@@ -11,7 +11,7 @@ type LoadMorePhonesProps = {
 };
 
 export default function LoadMorePhones({ initialNextCursor, searchTerm, brandTerm }: LoadMorePhonesProps) {
-  const [phones, setPhones] = useState<PhoneType[]>([]);
+  const [phones, setPhones] = useState<Phone[]>([]);
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [loading, setLoading] = useState(false);
 

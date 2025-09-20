@@ -1,145 +1,494 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Professional Prisma Schema for Phone Database
+// Optimized for production use with MongoDB
 
 generator client {
   provider = "prisma-client-js"
-  // output is optional; default is node_modules/@prisma/client
-  // output = "../generated/prisma" 
+  
 }
-
 
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
+// Enums for better type safety and consistency
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BANNED
+}
 
+enum PhoneStatus {
+  ACTIVE
+  DISCONTINUED
+  UPCOMING
+  DRAFT
+}
+
+enum SpecificationCategory {
+  DISPLAY
+  PERFORMANCE
+  CAMERA
+  BATTERY
+  CONNECTIVITY
+  BUILD
+  SOFTWARE
+  AUDIO
+  SENSORS
+  PRICING
+  OTHER
+}
+
+enum CommentStatus {
+  PUBLISHED
+  PENDING
+  HIDDEN
+  REPORTED
+}
+
+// User Model with enhanced fields
 model User {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
   email     String     @unique
+  username  String?    @unique
+  name      String
   password  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  wishlists    Wishlist[]
-  comparisons  Comparison[]
-  comments     Comment[]
-  ratings      Rating[]
-}
-
-model Brand {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String     @unique
-  slug      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  phones    Phone[]
-}
-
-model Phone {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  slug        String     @unique
-  releaseDate DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  brandId     String     @db.ObjectId
-  brand       Brand      @relation(fields: [brandId], references: [id])
-
-  specifications PhoneSpecification[]
-  colors         PhoneColor[]
-  comments       Comment[]
-  wishlists      Wishlist[]
-  comparisonItems ComparisonItem[]
-  ratings        Rating[]
-}
-
-model PhoneSpecification {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  key       String
-  value     String
-  imageUrl  String?
-  category  String?   // e.g. "Display", "Camera"
-
-  phoneId   String   @db.ObjectId
-  phone     Phone    @relation(fields: [phoneId], references: [id])
-
-  @@unique([phoneId, key])
-}
-
-model PhoneColor {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  name     String   // e.g. "Black"
-  hexCode  String   // e.g. "#000000"
-  imageUrl String   // one image per color
-
-  phoneId  String   @db.ObjectId
-  phone    Phone    @relation(fields: [phoneId], references: [id])
-
-  @@unique([phoneId, name])
-}
-
-model Wishlist {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  phoneId   String   @db.ObjectId
+  role      UserRole   @default(USER)
+  status    UserStatus @default(ACTIVE)
+  
+  // Profile information
+  avatar         String?
+  bio            String?
+  location       String?
+  website        String?
+  phoneNumber    String?
+  dateOfBirth    DateTime?
+  
+  // Preferences
+  emailNotifications    Boolean @default(true)
+  marketingEmails       Boolean @default(false)
+  preferredCurrency     String  @default("USD")
+  preferredLanguage     String  @default("en")
+  
+  // Authentication & Security
+  emailVerified         Boolean   @default(false)
+  emailVerifiedAt       DateTime?
+  lastLoginAt           DateTime?
+  passwordResetToken    String?
+  passwordResetExpires  DateTime?
+  twoFactorEnabled      Boolean   @default(false)
+  twoFactorSecret       String?
+  
+  // Timestamps
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
 
-  user      User   @relation(fields: [userId], references: [id])
-  phone     Phone  @relation(fields: [phoneId], references: [id])
-
-  @@unique([userId, phoneId])
+  // Relations
+  wishlists     Wishlist[]
+  comparisons   Comparison[]
+  comments      Comment[]
+  ratings       Rating[]
+  reviews       Review[]
+  followers     Follow[] @relation("UserFollowers")
+  following     Follow[] @relation("UserFollowing")
+  
+  @@map("users")
 }
 
-model Comparison {
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String          @db.ObjectId
-  createdAt DateTime        @default(now())
+// Brand Model with enhanced metadata
+model Brand {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String      @unique
+  slug        String      @unique
+  displayName String?     // For different display formatting
+  
+  // Brand information
+  description    String?
+  logo           String?
+  website        String?
+  headquarters   String?
+  foundedYear    Int?
+  
+  // SEO and metadata
+  metaTitle       String?
+  metaDescription String?
+  
+  // Status and visibility
+  isActive   Boolean @default(true)
+  isVerified Boolean @default(false)
+  
+  // Statistics (computed fields)
+  phoneCount     Int @default(0)
+  averageRating  Float?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
 
-  user      User            @relation(fields: [userId], references: [id])
-  items     ComparisonItem[]
+  // Relations
+  phones Phone[]
+  
+  @@map("brands")
+}
+
+// Enhanced Phone Model
+model Phone {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String      @unique
+  model       String?     // Model number/code
+  series      String?
+  status      PhoneStatus @default(ACTIVE)
+  
+  // Basic information
+  releaseDate     DateTime?
+  discontinuedAt  DateTime?
+  announcedAt     DateTime?
+  
+  // Detailed descriptions
+  description     String?
+  shortDescription String?
+  keyFeatures     String[] // Array of key features
+  
+  // Pricing information
+  launchPrice     Float?
+  currentPrice    Float?
+  currency        String @default("USD")
+  
+  // SEO and metadata
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[] // Search keywords
+  
+  // Media
+  primaryImage    String?
+  gallery         PhoneImage[]
+  videos          String[] // Array of video URLs
+  
+  // Statistics and metrics
+  viewCount       Int   @default(0)
+  likeCount       Int   @default(0)
+  reviewCount     Int   @default(0)
+  averageRating   Float @default(0)
+  
+  // Availability
+  isAvailable     Boolean @default(true)
+  stockStatus     String? // "in-stock", "out-of-stock", "limited"
+  
+  // Relations
+  brandId String @db.ObjectId
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
+
+  // Relations
+  specifications  PhoneSpecification[]
+  colors          PhoneColor[]
+  variants        PhoneVariant[]
+  comments        Comment[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+  comparisonItems ComparisonItem[]
+  ratings         Rating[]
+  
+  // Full-text search index
+  @@fulltext([name, description])
+  @@map("phones")
+}
+
+// Phone Variants (for different storage/RAM combinations)
+model PhoneVariant {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String // e.g., "128GB", "256GB + 8GB RAM"
+  storage  String
+  ram      String
+  price    Float?
+  currency String @default("USD")
+  
+  // Availability
+  isAvailable Boolean @default(true)
+  stockCount  Int?
+  
+  phoneId String @db.ObjectId
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([phoneId, storage, ram])
+  @@map("phone_variants")
+}
+
+// Enhanced Phone Specifications
+model PhoneSpecification {
+  id          String                @id @default(auto()) @map("_id") @db.ObjectId
+  key         String
+  value       String
+  displayName String?               // User-friendly display name
+  unit        String?               // e.g., "inches", "MP", "mAh"
+  category    SpecificationCategory @default(OTHER)
+  
+  // Additional metadata
+  imageUrl    String?
+  description String?
+  priority    Int     @default(0) // For ordering specifications
+  isHighlight Boolean @default(false) // Mark as key feature
+  
+  // Relations
+  phoneId String @db.ObjectId
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([phoneId, key])
+  @@map("phone_specifications")
+}
+
+// Enhanced Phone Colors
+model PhoneColor {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  hexCode  String
+  imageUrl String
+  
+  // Additional color properties
+  isDefault     Boolean @default(false)
+  isAvailable   Boolean @default(true)
+  priority      Int     @default(0)
+  description   String? // Color description
+  
+  // Relations
+  phoneId String @db.ObjectId
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([phoneId, name])
+  @@map("phone_colors")
+}
+
+// Phone Image Model
+model PhoneImage {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  description String?
+  altText     String?
+  order       Int     @default(0)
+
+  phoneId String @db.ObjectId
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("phone_images")
+}
+
+// Enhanced Wishlist with metadata
+model Wishlist {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  notes    String? // User notes about why they want this phone
+  priority Int     @default(0) // Priority level
+  
+  // Relations
+  userId  String @db.ObjectId
+  phoneId String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, phoneId])
+  @@map("wishlists")
+}
+
+// Enhanced Comparison with metadata
+model Comparison {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String? // User-defined comparison name
+  description String?
+  isPublic    Boolean @default(false) // Allow sharing comparisons
+  
+  // Relations
+  userId String             @db.ObjectId
+  user   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  ComparisonItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("comparisons")
 }
 
 model ComparisonItem {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  comparisonId  String      @db.ObjectId
-  phoneId       String      @db.ObjectId
-
-  comparison    Comparison  @relation(fields: [comparisonId], references: [id])
-  phone         Phone       @relation(fields: [phoneId], references: [id])
-
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  order        Int        @default(0) // Order in comparison
+  notes        String?    // User notes for this item
+  
+  // Relations
+  comparisonId String     @db.ObjectId
+  phoneId      String     @db.ObjectId
+  comparison   Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  phone        Phone      @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
   @@unique([comparisonId, phoneId])
+  @@map("comparison_items")
 }
 
+// Enhanced Comments with moderation
 model Comment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
   content   String
+  status    CommentStatus @default(PUBLISHED)
+  
+  // Moderation
+  isEdited     Boolean   @default(false)
+  editedAt     DateTime?
+  moderatedBy  String?   // Admin who moderated
+  moderatedAt  DateTime?
+  reportCount  Int       @default(0)
+  
+  // Engagement
+  likeCount    Int @default(0)
+  dislikeCount Int @default(0)
+  
+  // Relations
+  userId  String @db.ObjectId
+  phoneId String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  // Reply system
+  parentId String?    @db.ObjectId
+  parent   Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies  Comment[]  @relation("CommentReplies")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  userId    String   @db.ObjectId
-  phoneId   String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
-  phone     Phone    @relation(fields: [phoneId], references: [id])
+  
+  @@map("comments")
 }
 
-model Rating {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  value     Int      // 1 to 5 stars
+// Separate Review model for detailed reviews
+model Review {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  title   String
+  content String
+  rating  Int    // 1 to 5 stars
+  
+  // Detailed ratings
+  designRating      Int? // 1 to 5
+  performanceRating Int? // 1 to 5
+  cameraRating      Int? // 1 to 5
+  batteryRating     Int? // 1 to 5
+  valueRating       Int? // 1 to 5
+  
+  // Review metadata
+  isVerifiedPurchase Boolean @default(false)
+  isRecommended      Boolean?
+  usageDuration      String? // "1 week", "3 months", etc.
+  
+  // Pros and Cons
+  pros String[] // Array of pros
+  cons String[] // Array of cons
+  
+  // Media
+  images String[] // Review images
+  videos String[] // Review videos
+  
+  // Engagement
+  helpfulCount   Int @default(0)
+  notHelpfulCount Int @default(0)
+  
+  // Relations
+  userId  String @db.ObjectId
+  phoneId String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  @@unique([userId, phoneId]) // One review per user per phone
+  @@map("reviews")
+}
 
-  userId    String   @db.ObjectId
-  phoneId   String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
-  phone     Phone    @relation(fields: [phoneId], references: [id])
-
+// Simple Rating model (separate from detailed reviews)
+model Rating {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  value Int    // 1 to 5 stars
+  
+  // Relations
+  userId  String @db.ObjectId
+  phoneId String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   Phone  @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
   @@unique([userId, phoneId])
+  @@map("ratings")
+}
+
+// User Follow System
+model Follow {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  followerId  String @db.ObjectId
+  followingId String @db.ObjectId
+  
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// Analytics and Tracking
+model PhoneView {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  phoneId   String   @db.ObjectId
+  userId    String?  @db.ObjectId // null for anonymous views
+  ipAddress String?
+  userAgent String?
+  referrer  String?
+  country   String?
+  city      String?
+  
+  viewedAt DateTime @default(now())
+  
+  @@map("phone_views")
+}
+
+// Search Analytics
+model SearchQuery {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  query     String
+  results   Int      @default(0)
+  userId    String?  @db.ObjectId
+  ipAddress String?
+  
+  searchedAt DateTime @default(now())
+  
+  @@map("search_queries")
 }

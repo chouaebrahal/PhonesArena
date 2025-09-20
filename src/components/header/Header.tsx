@@ -4,18 +4,10 @@ import { Menu, FolderSearch, Search, X, ChevronRight, Loader2 } from "lucide-rea
 import React, { useState, useEffect } from "react";
 import IconsClient from "../icons/IconsClient";
 import Image from "next/image";
-import { searchPosts } from "@/lib/queries";
+import {Brand} from "@/lib/types"
 
 // Define BrandNode type locally since it's not fully defined in types file
-interface BrandNode {
-  id: string;
-  name: string;
-  slug: string;
-  image: {
-    sourceUrl: string;
-    altText: string;
-  };
-}
+
 
 
 
@@ -43,7 +35,7 @@ interface SearchResult {
 
 const navItems = [
   { name: "Home", href: "/" },
-  { name: "Brands", href: "/brands" },
+  { name: "phones", href: "/phones" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
@@ -101,8 +93,8 @@ const SearchOverlay = ({
   setHasSearched(true);
 
   try {
-    // Use your existing GraphQL setup
-    const results = await searchPosts(query); // Your search function
+    const response = await fetch(`/api/phones?search=${encodeURIComponent(query)}`);
+    const results = await response.json();
     setSearchResults(results);
   } catch (error) {
     console.error('Search error:', error);
@@ -210,7 +202,7 @@ const SearchOverlay = ({
                   {searchResults.map((post) => (
                     <Link
                       key={post.id}
-                      href={`/brands/${post.slug}`}
+                       href={`/phones/${post.slug}`}
                       onClick={onClose}
                       className="group block p-4 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                     >
@@ -299,7 +291,7 @@ const CategoryOverlay = ({
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
-  categories: BrandNode[] | null;
+  categories: Brand[] | null;
   isLoading: boolean;
 }) => {
   useEffect(() => {
@@ -370,8 +362,8 @@ const CategoryOverlay = ({
                     {/* Brand Image */}
                     <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                       <Image
-                        src={brand.image?.sourceUrl || "../favicon.ico"}
-                        alt={brand.image?.altText || brand.slug}
+                        src={brand.logo || "../favicon.ico"}
+                        alt={brand.slug}
                         fill
                         className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                       />
@@ -434,7 +426,7 @@ const CategoryOverlay = ({
 const Header = () => {
   const [isCategoryOverlayOpen, setIsCategoryOverlayOpen] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
-  const [categories, setCategories] = useState<BrandNode[] | null>(null);
+  const [categories, setCategories] = useState<Brand[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch categories when overlay opens for the first time
@@ -446,6 +438,7 @@ const Header = () => {
           // Fetch brands from API endpoint
           const response = await fetch('/api/brands');
           const brandsData = await response.json();
+          console.dir(brandsData);
           setCategories(brandsData);
         } catch (error) {
           console.error('Error fetching brands:', error);
@@ -500,7 +493,7 @@ const Header = () => {
     <>
       <header className="w-full relative">
         <div className="container mx-auto">
-          <nav className="flex justify-center items-center g-4 w-full py-4">
+          <nav className="flex justify-center items-center g-4 w-full py-2">
             <ul className="hidden lg:flex gap-8">
               {navItems.map((item) => (
                 <li key={item.name}>

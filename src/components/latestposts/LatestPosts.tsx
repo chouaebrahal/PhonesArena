@@ -1,16 +1,17 @@
 import PostCard from "@/components/postCard/PostCard";
-import { PhoneType } from "@/lib/types";
+import { Pagination, Phone } from "@/lib/types";
 import LoadMorePhones from "@/components/LoadMorePhones";
 
-type LatesPostsProps = {
-  phones: PhoneType[];
+type LatestPostsProps = {
+  initialPhones: Phone[];
+  pagination: Pagination | null;
   searchTerm?: string;
   brandTerm?: string;
 };
 
-const LatestPosts = ({ phones, searchTerm, brandTerm }: LatesPostsProps) => {
-  const [latest, ...others] = phones;
-  const initialNextCursor = phones.length >= 5 ? phones[4].id : null;
+const LatestPosts = ({ initialPhones, pagination, searchTerm, brandTerm }: LatestPostsProps) => {
+  
+  const [latest, ...others] = initialPhones;
 
   return (
     <div>
@@ -33,11 +34,11 @@ const LatestPosts = ({ phones, searchTerm, brandTerm }: LatesPostsProps) => {
       </div>
 
       {/* Load More Button - Client Component */}
-      <LoadMorePhones 
-        initialNextCursor={initialNextCursor} 
+      {/* <LoadMorePhones 
+        initialNextCursor={pagination.hasNextPage} 
         searchTerm={searchTerm}
         brandTerm={brandTerm}
-      />
+      /> */}
     </div>
   );
 };
