@@ -1,6 +1,9 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { PhoneStatus, SpecificationCategory } from '@prisma/client';
+
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +16,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Search
-    const searchTerm = searchParams.get('search')?.trim();
+    const searchTerm = searchParams.get('searchTerm')?.trim();
 
     // Filtering
     const brandId = searchParams.get('brandId');
@@ -98,9 +101,14 @@ export async function GET(request: NextRequest) {
     if (brandId) {
       where.brandId = brandId;
     } else if (brandSlug) {
-      where.brand = {
-        slug: brandSlug,
-      };
+      const slugs = brandSlug.split(',').map(s => s.trim()).filter(Boolean);
+      if (slugs.length > 0) {
+        where.brand = {
+          slug: {
+            in: slugs,
+          },
+        };
+      }
     }
 
     // Other filters

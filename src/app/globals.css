@@ -18,6 +18,37 @@ body {
   color: var(--foreground) !important;
   font-family: Outfit, Helvetica, sans-serif;
 }
+
+
+
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+
+
+
 .wp-block-heading{
   font-size: 40px;
   font-weight: bold;

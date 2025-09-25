@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { ArrowLeft, Share2, Heart, Search, Menu, FolderSearch } from "lucide-react";
+import { LogIn, ArrowLeft, Share2, Heart, Search, Menu, FolderSearch } from "lucide-react";
 
-type IconName = "ArrowLeft" | "Share2" | "Heart" | "Search" | "Menu" | "FolderSearch";
+type IconName = "ArrowLeft" | "Share2" | "Heart" | "Search" | "Menu" | "FolderSearch" | "LogIn";
 
 export default function IconsClient({
   name,
@@ -29,6 +29,8 @@ export default function IconsClient({
       return <Menu size={size} className={className} />;
     case "FolderSearch":
       return <FolderSearch onClick={onclick} size={size} className={className} />;
+    case "LogIn":
+      return <LogIn onClick={onclick} size={size} className={className} />;
     default:
       return null;
   }

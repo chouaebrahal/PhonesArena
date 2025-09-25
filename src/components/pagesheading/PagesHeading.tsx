@@ -8,7 +8,7 @@ type HeaderProps = {
   title?: string
   views?: number
   url?: string
-  author?: { name: string; avatar: string }
+  author?: { name: string | undefined; avatar: string | undefined}
   publishedAt?: string
 }
 

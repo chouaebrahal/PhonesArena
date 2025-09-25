@@ -109,7 +109,7 @@ export interface Phone {
   model?: string;
   series?: string;
   status: PhoneStatus;
-  releaseDate?: string;
+  releaseDate: string;
   discontinuedAt?: string;
   announcedAt?: string;
   description?: string;

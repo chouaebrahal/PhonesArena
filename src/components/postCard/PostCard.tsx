@@ -8,29 +8,47 @@ type PostCardProps = {
   latest?: boolean;
 };
 
-const  PostCard = ({ post, latest }: PostCardProps) => {
-  const { name, slug, releaseDate, launchPrice, brand, primaryImage, description } = post;
+const PostCard = ({ post, latest }: PostCardProps) => {
+  const { id,name, slug, releaseDate, launchPrice, brand, primaryImage, description, colors } = post;
 
   const excerpt = description;
- 
+
+  // --- Start of new logic ---
+  const getGradient = () => {
+    if (!colors || colors.length === 0) {
+      return 'linear-gradient(to top right, #f0f0f0, #e0e0e0)'; // Default gradient
+    }
+
+    const color1 = colors[0].hexCode;
+    const color2 = colors.length > 1 ? colors[1].hexCode : '#ffffff'; // Use white if only one color
+
+    return `linear-gradient(to top right, ${color1}, ${color2})`;
+  };
+  console.log(post);
+
+  const gradientStyle = {
+    background: getGradient(),
+  };
+  // --- End of new logic ---
 
   return (
     <Link
-      href={`/phones/${slug}`}
-      className={`overflow-hidden cursor-pointer rounded-lg  transition-all duration-300`}
+      href={`/phones/${id}-${slug}`}
+      className={`overflow-hidden cursor-pointer rounded-lg transition-all duration-300`}
     >
       {/* Image */}
       <div
         className={`relative w-full ${
           latest ? "h-[400px] sm:h-[500px]" : "h-[180px] sm:h-[220px]"
         } overflow-hidden`}
+        style={gradientStyle} // Apply gradient here
       >
         <Image
           alt={name}
           src={primaryImage ?? "/next.svg"}
           width={800}
           height={500}
-          className="w-full h-full object-cover hover:scale-105 duration-300"
+          className="w-full h-full object-contain hover:scale-105 duration-300" // Changed to object-contain
         />
         {/* Views badge */}
         <div className="absolute bottom-2 right-2 flex items-center bg-black/60 text-[13px] px-2 py-1 rounded-full text-yellow-100">
@@ -78,4 +96,3 @@ const  PostCard = ({ post, latest }: PostCardProps) => {
 };
 
 export default PostCard;
-

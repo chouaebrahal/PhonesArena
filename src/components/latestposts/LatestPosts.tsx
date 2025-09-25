@@ -7,18 +7,22 @@ type LatestPostsProps = {
   pagination: Pagination | null;
   searchTerm?: string;
   brandTerm?: string;
+  simple:boolean;
 };
 
-const LatestPosts = ({ initialPhones, pagination, searchTerm, brandTerm }: LatestPostsProps) => {
+const LatestPosts = ({ initialPhones, pagination, searchTerm, brandTerm,simple }: LatestPostsProps) => {
+   const [latest, ...others] = initialPhones;
   
-  const [latest, ...others] = initialPhones;
+ 
+ 
 
   return (
     <div>
+
       <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 mb-10">
         {/* Latest post (left side, half width) */}
         <div>
-          {latest ? (
+          {latest ?  (
             <PostCard key={latest.id} post={latest} latest={true} />
           ) : (
             <div>No posts to display</div>
