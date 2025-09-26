@@ -17,6 +17,7 @@ export const SignupForm = () => {
   const {
     register,
     handleSubmit,
+    reset, // <-- Make reset available
     formState: { errors, isSubmitting },
   } = useForm<TSignupSchema>({
     resolver: zodResolver(SignupSchema),
@@ -28,14 +29,48 @@ export const SignupForm = () => {
     },
   });
 
-  const onSubmit = (data: TSignupSchema) => {
-    // TODO: Handle actual API submission
-    console.log('Signup data submitted:', data);
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const onSubmit = async (data: TSignupSchema) => {
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        setError(responseData.error || 'An unexpected error occurred.');
+        return;
+      }
+
+      setSuccess(responseData.success || 'Account created successfully!');
+      reset(); // <-- Reset the form on success
+    } catch (error) {
+      setError('Failed to connect to the server.');
+      console.error('Signup data not submitted:', error);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
+          <strong className="font-bold">Success: </strong>
+          <span className="block sm:inline">{success}</span>
+        </div>
+      )}
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
         <div className="relative">

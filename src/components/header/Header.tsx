@@ -1,12 +1,13 @@
 'use client';
 import Link from "next/link";
-import { Menu, FolderSearch, Search, X, ChevronRight, Loader2 ,LogIn } from "lucide-react";
+import { Menu, FolderSearch, Search, X, ChevronRight, Loader2 ,LogIn, LogOut } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import IconsClient from "../icons/IconsClient";
 import Image from "next/image";
 import {Brand} from "@/lib/types"
 import { Phone } from "@/lib/types";
 import { useAuthModal } from "@/context/ModalProvider";
+import { useSession, signOut } from "next-auth/react";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -18,7 +19,6 @@ const navItems = [
 const navItems2 = [
   { name: "browse", icon: "FolderSearch", href: "/" },
   { name: "search", icon: "Search", href: "/blog" },
-  { name: "Login", icon: "Login", href: "/login" },
 ];
 
 // Search Overlay Component
@@ -481,7 +481,7 @@ const MobileNav = ({
                       onLoginClick(e); 
                       onClose(); 
                     }}
-                    className="flex items-center w-full p-3 text-lg font-medium text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className="flex items-center w-full p-3 text-lg font-medium text-gray-700 rounded-lg hover:bg-gray-100 dark:text-ray-300 dark:hover:bg-gray-800"
                   >
                     <IconsClient name="LogIn" size={20} className="mr-3" />
                     <span>Login</span>
@@ -509,6 +509,7 @@ const MobileNav = ({
 
 
 const Header = () => {
+  const { data: session, status } = useSession();
   const [isCategoryOverlayOpen, setIsCategoryOverlayOpen] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -575,8 +576,6 @@ const Header = () => {
       handleBrowseClick(e);
     } else if (item.name === "search") {
       handleSearchClick(e);
-    } else if (item.name === "Login") {
-      handleLoginClick(e);
     }
   };
 
@@ -623,36 +622,40 @@ const Header = () => {
             <div className="hidden lg:flex items-center justify-end gap-8 flex-1">
               {navItems2.map((item) => (
                 <li key={item.name} className="list-none">
-                  {item.name === "Login" ? (
-                     <button
-                      onClick={(e) => handleNavClick(item, e)}
-                      className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <IconsClient name={item.icon as any} size={16} />
-                      <span>{item.name}</span>
-                    </button>
-                  ) : item.name === "browse" || item.name === "search" ? (
-                    <button
-                      onClick={(e) => handleNavClick(item, e)}
-                      className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <IconsClient name={item.icon as any} size={14} />
-                      <span>{item.name}</span>
-                      {item.name === "search" && (
-                        <span className="ml-1 text-xs opacity-60 border border-gray-300 dark:border-gray-600 rounded px-1.5 py-0.5">⌘K</span>
-                      )}
-                    </button>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <IconsClient name={item.icon as any} size={16} />
-                      <span>{item.name}</span>
-                    </Link>
-                  )}
+                  <button
+                    onClick={(e) => handleNavClick(item, e)}
+                    className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <IconsClient name={item.icon as any} size={14} />
+                    <span>{item.name}</span>
+                    {item.name === "search" && (
+                      <span className="ml-1 text-xs opacity-60 border border-gray-300 dark:border-gray-600 rounded px-1.5 py-0.5">⌘K</span>
+                    )}
+                  </button>
                 </li>
               ))}
+              {status === 'authenticated' ? (
+                <li className="list-none flex items-center gap-4">
+                  <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <LogOut size={16} />
+                    <span>Sign out</span>
+                  </button>
+                  <Image src={session.user?.image || ''} alt={session.user?.name || ''} width={32} height={32} className="rounded-full" />
+                </li>
+              ) : (
+                <li className="list-none">
+                  <button
+                    onClick={handleLoginClick}
+                    className="flex items-center gap-2 text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <LogIn size={16} />
+                    <span>Login</span>
+                  </button>
+                </li>
+              )}
             </div>
             
             <div className="lg:hidden flex-1 flex justify-end">

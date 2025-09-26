@@ -2,7 +2,7 @@ import Categories from "@/components/categories/Categories";
 import LatestPosts from "@/components/latestposts/LatestPosts";
 import PagesHeading from "@/components/pagesheading/PagesHeading";
 import { Phone,Pagination } from "@/lib/types";
-
+import { signIn } from "@/auth"
 
 async function getPhones(searchParams: { [key: string]: string | undefined }): Promise<{ data: Phone[], pagination: Pagination | null }> {
   const { searchTerm, brandTerm, limit, sortBy, sortOrder } = searchParams;
@@ -33,11 +33,11 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
 
   return (
     <div className=" min-h-screen">
+     
       <PagesHeading
         title="All Phones"
         subtitle="Explore our comprehensive list of the latest smartphones."
       />
-     
       <div className="container mx-auto">
       <Categories />
       <div className="container">

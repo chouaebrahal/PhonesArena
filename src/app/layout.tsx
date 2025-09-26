@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header/Header";
+import SessionProvider from "@/context/SessionProvider";
 import { ModalProvider } from "@/context/ModalProvider";
 
 const outfit = Outfit({
@@ -27,10 +28,12 @@ export default function RootLayout({
       <body
         className={`${outfit.variable}  antialiased`}
       >
-        <ModalProvider>
-          <Header />
-          {children}
-        </ModalProvider>
+        <SessionProvider>
+          <ModalProvider>
+            <Header />
+            {children}
+          </ModalProvider>
+        </SessionProvider>
       </body>
     </html>
   );
