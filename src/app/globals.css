@@ -14,9 +14,9 @@
 
 
 body {
-  background: var(--background) !important;
-  color: var(--foreground) !important;
-  font-family: Outfit, Helvetica, sans-serif;
+  transition-property: opacity, transform, filter, background;
+  transition-timing-function: ease-in-out;
+  transition-duration: 500ms;
 }
 
 
@@ -29,7 +29,7 @@ html {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -81,5 +81,9 @@ html {
   top: 50%; 
   margin-top: -30px; /* Half of button height to center */
 }
+.bgHeading {
+ background: linear-gradient(360deg,  #F5F5F7 0% 10%, pink 100%);
+}
+
 
 

@@ -4,6 +4,7 @@ import PagesHeading from "@/components/pagesheading/PagesHeading";
 import { Phones } from "@/components/phonesPage";
 import { Phone, Pagination } from "@/lib/types";
 
+
 async function getPhones(searchParams: { [key: string]: string | string[] | undefined }): Promise<{ data: Phone[], pagination: Pagination | null }> {
   const params =  new URLSearchParams();
   for (const [key, value] of Object.entries(await searchParams)) {
@@ -40,7 +41,9 @@ export default async function PhonesPage({ searchParams }: { searchParams: { [ke
       <div className="flex gap-4 w-full">
         <aside><FilterSidebar totalResults={pagination?.totalCount} /></aside>
         <main className="w-full sm:w-fit">
-          <Phones phones={data} />
+          
+            <Phones phones={data} />
+          
         </main>
       </div>
     </div>

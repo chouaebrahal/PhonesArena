@@ -8,6 +8,7 @@ import {Brand} from "@/lib/types"
 import { Phone } from "@/lib/types";
 import { useAuthModal } from "@/context/ModalProvider";
 import { useSession, signOut } from "next-auth/react";
+import { TransitionLink } from "../utils/TransitionLink";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -588,12 +589,12 @@ const Header = () => {
             <ul className="hidden lg:flex items-center gap-8 flex-1">
               {navItems.map((item) => (
                 <li key={item.name}>
-                  <Link
+                  <a
                     href={item.href}
-                    className="text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="nav-link text-[var(--primary)] text-sm font-semibold px-3 py-2 rounded-lg transition-colors duration-300 hover:text-[var(--secondary)] hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     {item.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

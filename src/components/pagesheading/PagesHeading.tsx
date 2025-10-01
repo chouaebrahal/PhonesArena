@@ -1,7 +1,8 @@
+'use client'
 import { Flame, Zap } from "lucide-react"
 import Image from "next/image"
 import React from "react"
-
+import { motion } from "framer-motion";
 
 type HeaderProps = {
   type?: "video" | "image"
@@ -20,8 +21,25 @@ const PagesHeading = ({
   publishedAt,
   url = "/globe.svg",
 }: HeaderProps) => {
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="relative w-full py-20  !bg-[var(--bg-alt)]">
+    <div className="relative w-full py-20 bgHeading">
       {/* Background
       {type === "image" && (
         <Image
@@ -46,34 +64,63 @@ const PagesHeading = ({
       {/* <div className="absolute inset-0 bg-black/50" /> */}
 
       {/* Content */}
-      <section className="relative  flex flex-col items-center justify-center gap-4 h-full container  mx-auto text-center ">
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative flex flex-col items-center justify-center gap-4 h-full container mx-auto text-center "
+      >
         {/* Icons */}
-        <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--primary)] text-[var(--foreground)]">
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-2">
+          <motion.div
+            animate={{
+              y: [0, -5, 0],
+              rotate: [0, 2, -2, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              repeatType: "loop",
+            }}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--primary)] text-[var(--foreground)]"
+          >
             <Flame className="w-5 h-5" />
-          </div>
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary)] text-[var(--foreground)]">
+          </motion.div>
+          <motion.div
+            animate={{
+              rotate: [0, 10, -10, 10, -10, 0],
+            }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity,
+              repeatType: "loop",
+            }}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary)] text-[var(--foreground)]"
+          >
             <Zap className="w-5 h-5" />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Button + Views */}
-        <div className="flex items-center gap-3">
+        <motion.div variants={itemVariants} className="flex items-center gap-3">
           <button className="px-6 py-1 text-[14px] rounded-full border bg-[var(--primary)] text-[var(--foreground)] font-medium hover:bg-[var(--secondary)] transition cursor-pointer">
             Design
           </button>
           <div className="flex items-center text-[14px] gap-2 px-4 py-1 rounded-full text-[var(--foreground)]">
             👀 <span>{views || "1.2k views"}</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Title */}
-        <h1 className="max-w-3xl text-3xl md:text-4xl font-bold text-[var(--foreground)] leading-snug">
+        <motion.h1
+          variants={itemVariants}
+          className="max-w-3xl text-3xl md:text-4xl font-bold text-[var(--foreground)] leading-snug"
+        >
           {title || "How to Add Video Background in Next.js Application"}
-        </h1>
+        </motion.h1>
 
         {/* Author + Date */}
-        <div className="flex items-center gap-3  mt-2">
+        <motion.div variants={itemVariants} className="flex items-center gap-3 mt-2">
           <Image
             src={author?.avatar || "/images/49.png"}
             alt={`avatar of ${author?.name || "Chouaeb Rahal"}`}
@@ -89,8 +136,8 @@ const PagesHeading = ({
               {publishedAt || "Published on Sep 11, 2025"}
             </span>
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
     </div>
   )
 }

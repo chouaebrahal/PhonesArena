@@ -5,6 +5,9 @@ import Header from "@/components/header/Header";
 import SessionProvider from "@/context/SessionProvider";
 import { ModalProvider } from "@/context/ModalProvider";
 
+
+
+
 const outfit = Outfit({
   variable: "--outfit",
   subsets: ["latin",],
@@ -29,9 +32,11 @@ export default function RootLayout({
         className={`${outfit.variable}  antialiased`}
       >
         <SessionProvider>
-          <ModalProvider>
-            <Header />
-            {children}
+          <ModalProvider>  
+            
+            
+              {children}
+           
           </ModalProvider>
         </SessionProvider>
       </body>

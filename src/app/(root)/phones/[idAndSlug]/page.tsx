@@ -6,6 +6,8 @@ import { Phone } from "@/lib/types";
 import CommentsClient from "@/components/comments/CommentsClient";
 import SectionHeader from "@/components/SectionHeader";
 import CommentsSection from "@/components/comments/CommentsClient";
+import { ErrorBoundary } from 'react-error-boundary';
+import ErrorFallback from '@/components/common/ErrorFallback';
 
 // The API returns a different shape now, let's adjust the type
 interface PhoneDetailsResponse {
@@ -44,23 +46,25 @@ export default async function PhoneDetailPage({ params }: { params: { idAndSlug:
   }
 
   return (
-    <div className="mx-auto py-10">
-      <PagesHeading
-        title={phone.name}
-        author={{ name: phone.brand?.name, avatar: phone.brand?.logo || "" }}
-        views={phone.viewCount}
-        publishedAt={new Date(phone.releaseDate).toLocaleDateString()}
-      />
-      <div className="grid grid-cols-1 ">
-          <SectionHeader title="Technical Specifications For" phone={phone} />
-          <PhoneSpecDetail {...phone} />
-          <SectionHeader title="Some Images For" phone={phone} />
-        
-      </div>
-      <div>
-          <ImageCarousel {...phone}  />
+  
+      <div className="mx-auto py-10">
+        <PagesHeading
+          title={phone.name}
+          author={{ name: phone.brand?.name, avatar: phone.brand?.logo || "" }}
+          views={phone.viewCount}
+          publishedAt={new Date(phone.releaseDate).toLocaleDateString()}
+        />
+        <div className="grid grid-cols-1 ">
+            <SectionHeader title="Technical Specifications For" phone={phone} />
+            <PhoneSpecDetail {...phone} />
+            <SectionHeader title="Some Images For" phone={phone} />
+          
         </div>
-      {/* <CommentsClient phoneId={phone.id} initialComments={phone.comments} /> */}
-    </div>
+        <div>
+            <ImageCarousel {...phone}  />
+          </div>
+        {/* <CommentsClient phoneId={phone.id} initialComments={phone.comments} /> */}
+      </div>
+    
   );
 }

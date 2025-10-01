@@ -1,6 +1,8 @@
+'use client'
 import PostCard from "@/components/postCard/PostCard";
 import { Pagination, Phone } from "@/lib/types";
 import LoadMorePhones from "@/components/LoadMorePhones";
+import { motion } from "framer-motion";
 
 type LatestPostsProps = {
   initialPhones: Phone[];
@@ -12,9 +14,25 @@ type LatestPostsProps = {
 
 const LatestPosts = ({ initialPhones, pagination, searchTerm, brandTerm,simple }: LatestPostsProps) => {
    const [latest, ...others] = initialPhones;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.3, // add a 0.3s delay before starting the animation
+        staggerChildren: 0.1
+      }
+    }
+  };
   
- 
- 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
 
   return (
     <div>
@@ -30,11 +48,18 @@ const LatestPosts = ({ initialPhones, pagination, searchTerm, brandTerm,simple }
         </div>
 
         {/* Other posts (right side, half width) */}
-        <div className="grid grid-cols-2 gap-4">
+        <motion.div
+          className="grid grid-cols-2 gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {others.map((post) => (
-            <PostCard key={post.id} post={post} latest={false} />
+            <motion.div key={post.id} variants={itemVariants}>
+              <PostCard post={post} latest={false} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* Load More Button - Client Component */}

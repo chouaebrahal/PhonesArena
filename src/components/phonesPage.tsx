@@ -13,6 +13,7 @@ import {
   Smartphone
 } from "lucide-react";
 import { Phone } from "@/lib/types";
+import { motion } from "framer-motion";
 
 // Modern PhoneCard component with animations
 const PhoneCard = ({ phone }: { phone: Phone }) => {
@@ -193,6 +194,24 @@ const Phones = ({ phones, isLoading = false }: { phones: Phone[], isLoading?: bo
     }
   }, [phones]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
+
   // Skeleton loading cards
   if (isLoading) {
     return (
@@ -242,33 +261,21 @@ const Phones = ({ phones, isLoading = false }: { phones: Phone[], isLoading?: bo
         </h2>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {displayedPhones.map((phone, index) => (
-          <div 
-            key={phone.id} 
-            className="transition-all duration-500 ease-out"
-            style={{
-              animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`
-            }}
+          <motion.div
+            key={phone.id}
+            variants={itemVariants}
           >
             <PhoneCard phone={phone} />
-          </div>
+          </motion.div>
         ))}
-      </div>
-      
-      {/* CSS animations */}
-      {/* <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style> */}
+      </motion.div>
     </div>
   );
 };

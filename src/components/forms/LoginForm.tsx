@@ -6,12 +6,14 @@ import { LoginSchema } from '@/lib/auth';
 import { z } from 'zod';
 import { Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 
 // Infer type from Zod schema
 type TLoginSchema = z.infer<typeof LoginSchema>;
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -26,14 +28,25 @@ export const LoginForm = () => {
     },
   });
 
-  const onSubmit = (data: TLoginSchema) => {
-    // TODO: Handle actual API submission
-    console.log('Login data submitted:', data);
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  const onSubmit = async (data: TLoginSchema) => {
+    setError(null);
+    try {
+      const result = await signIn('credentials', {
+        ...data,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid email or password');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">{error}</div>}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
         <div className="relative">

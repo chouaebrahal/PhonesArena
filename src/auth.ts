@@ -23,6 +23,7 @@ declare module "next-auth" {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET, // Add the secret explicitly
   providers: [
     Google,
     GitHub,
@@ -62,4 +63,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  pages: {
+    signIn: '/auth/login', // Specify your login page
+  },
+  debug: process.env.NODE_ENV === 'development', // Enable debug in development
 });
